@@ -68,7 +68,8 @@ dn: directory name
 arch: net arch
 
 @return 
-W: weights of the nerual network
+weights of the nerual network
+returns None if the net arch is not matched with weights
 '''
 
 #saves weights to the file
