@@ -1,7 +1,7 @@
 import numpy as np
 
 class Agent():
-    def __init__(self, arch, epoch, eta, seed, gamma, W = None):
+    def __init__(self, arch, epoch, eta, seed, gamma, color, W = None):
         self.samples = []
         self.W = []
         self.Z = []
@@ -12,6 +12,7 @@ class Agent():
         self.eta = eta
         self.seed = seed 
         self.gamma = gamma
+        self.color = color
 
         if W == None:
             np.random.seed(self.seed)
