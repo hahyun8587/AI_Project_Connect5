@@ -1,9 +1,8 @@
 import numpy as np
 
 class Agent():
-    def __init__(self, arch, epoch, eta, seed, gamma, W = None):
+    def __init__(self, arch, epoch, eta, seed, gamma, color, W = None):
         self.samples = []
-        self.W = []
         self.Z = []
         self.A = []
         self.cost = []
@@ -12,8 +11,11 @@ class Agent():
         self.eta = eta
         self.seed = seed 
         self.gamma = gamma
+        self.color = color
 
         if W == None:
+            self.W = []
+
             np.random.seed(self.seed)
 
             for i in range(1, len(self.arch)):
