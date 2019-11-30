@@ -95,6 +95,17 @@ dn: directory name
 W: list of weights
 '''
 
+def netArch(inp, hidden, outp, num):
+    arch = []
+
+    arch.append(inp)
+
+    for i in range(num):
+        arch.append(hidden)
+
+    arch.append(outp)
+
+    return arch    
 
     
 

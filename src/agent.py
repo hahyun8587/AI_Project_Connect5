@@ -1,7 +1,7 @@
 import numpy as np
 
 class Agent():
-    def __init__(self, arch, epoch, eta, seed, gamma, color, W = None):
+    def __init__(self, arch, eta, gamma, W = None, seed = None, epoch = None):
         self.samples = []
         self.Z = []
         self.A = []
@@ -9,19 +9,21 @@ class Agent():
         self.arch = arch
         self.epoch = epoch
         self.eta = eta
-        self.seed = seed 
         self.gamma = gamma
-        self.color = color
 
         if W == None:
+            self.seed = seed
             self.W = []
 
             np.random.seed(self.seed)
 
             for i in range(1, len(self.arch)):
-                self.W.append(np.random.random((self.arch[i], self.arch[i - 1])))
+                self.W.append(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1)
         else:
             self.W = W
+
+    def setColor(self, color):
+        self.color = color        
 
     def relu(self, Z):
         return max(0, Z)
@@ -41,27 +43,28 @@ class Agent():
         return sm * (1 - sm)
 
     def predict(self, X):
-        A = [X]
         Z = []
+        A = [X]
 
         for i in range(len(self.W)):
             Z.append(np.dot(self.W[i], A[i]))    
             A.append(self.relu(Z[i]))
         
-        return Z, A, self.SM(A[-1]) 
-
-    def act(self, policy):
-       return np.random.choice(self.arch[-1], p = policy.flat) 
-
-    def saveSample(self, state, Z, A, policy, reward):
-        self.samples.append((state, policy, reward))
         self.A.append(A)
         self.Z.append(Z)
 
+        return self.SM(A[-1]) 
+
+    def act(self, policy):
+        return np.random.choice(self.arch[-1], p = policy.flat) 
+
+    def saveSample(self, state, policy, reward):
+        self.samples.append((state, policy, reward))
+    
     def calcG_t(self):
         n = len(self.samples)
 
-        dp = np.array(n)
+        dp = np.zeros(n)
         dp[n - 1] = self.samples[n - 1][2]
 
         for i in range(n - 2, -1, -1):
@@ -81,6 +84,14 @@ class Agent():
         for i in range(len(self.W) - 2, -1, -1):
             policy = np.dot(self.W[i + 1].T, self.SM(self.A[t][i + 2]))
             self.W[i] += self.eta * np.dot(policy * (1 - policy) * self.reluPrime(self.Z[t][i]), self.A[t][i].T) * g_t
+
+    def optimizeEp(self):
+        n = len(self.samples)
+
+        self.calcG_t()
+
+        for i in range(n):
+            self.optimize(n - 1 - i)
 
     def clear(self):
         for i in range(len(self.samples)):

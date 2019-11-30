@@ -288,6 +288,8 @@ class Environment():
         if self.state[action // n][action % n]:
             return True      
         
+        self.place(action, color)
+
         if color == -1:
             if self.connect(self.goal + 1, action):
                 return True    
@@ -303,12 +305,19 @@ class Environment():
         demerit = -10
         neut = 0
 
-        if self.win(action, color):
-            return merit
-        elif self.lose(action, color):
+        if self.lose(action, color):
             return demerit
+        elif self.win(action, color):
+            return merit
         else:
             return neut             
+
+    def clear(self):
+        n = len(self.state)
+
+        for i in range(n):
+            for j in range(n):
+                self.state[i][j] = 0
 
     def show(self):
         n = len(self.state)
@@ -318,6 +327,7 @@ class Environment():
                 print(self.state[i][j], end = " ")
 
             print()     
+
 
 
 
