@@ -42,10 +42,13 @@ class Agent():
         return A - A_min / (A_max - A_min) 
 
     def SM(self, A):
+        c = 0.00001
+
         norm = A - A.max(axis = 0)
         exps = np.exp(norm)
-        
-        return exps / exps.sum(axis = 0)
+        sums = exps.sum(axis = 0)
+
+        return exps / sums if sums else c
     
     def SMPrime(self, A):
         sm = self.SM(A)

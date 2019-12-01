@@ -35,9 +35,10 @@ dnB = "modelB_weights.txt"
 modelA = None
 modleB = None
 load = False
-epoch = 2
+epoch = 10
 eta = 0.01
 gamma = 0.9
+seed = 7
 inp = 225
 hidden = 300
 outp = 10
@@ -50,13 +51,14 @@ modelA = agent.Agent(arch, eta, gamma, utils.load(dnA, arch) if load else None)
 modelB = agent.Agent(arch, eta, gamma, utils.load(dnB, arch) if load else None)
 envir = env.Environment(size, goal)
 
+"""
 modelA.color = -1
 modelB.color = 1
 
 for i in range(epoch):
     print(i)
 
-    for j in range(1):
+    while 1:
         if not step(envir, modelA, modelB):
             break
         if not step(envir, modelB, modelA):
@@ -68,8 +70,8 @@ for i in range(epoch):
     modelA.clear()
     modelB.clear()
     envir.clear()
-
 """
+
 for i in range(epoch):
     black = -1
     white = 1
@@ -96,7 +98,6 @@ for i in range(epoch):
         
 utils.save(dnA, modelA.W)
 utils.save(dnB, modelB.W)
-"""
 
         
 

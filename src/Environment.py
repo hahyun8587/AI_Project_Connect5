@@ -93,6 +93,7 @@ class Environment():
             k += step_k    
 
     def checkThree(self, point, step_j, step_k, lim, color):
+        #print("\n[searching] step j:", step_j, "step_k:", step_k)
         n = len(self.state)
         hit = 0
         miss = 0
@@ -103,7 +104,7 @@ class Environment():
         e = []
         num = 3
 
-        if not self.outOfRange(point_j - step_j, point_k - step_k):
+        if not self.outOfRange(point_j - step_j, point_k - step_k):            
             if self.state[point_j - step_j][point_k - step_k]:
                 return False
         else:
@@ -126,31 +127,42 @@ class Environment():
         self.addList(s, num - 1, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k, color)
         self.addList(e, num + 1, n * j + k, step_j, step_k, color)
 
-        if hit != lim:      # 2 hits
+        #print(hit, miss, blank, lim)
+        #print(s, e, sep = '\n')
+
+        if hit != lim - 1:      # 2 hits
+            #print("not forming three(no 3 hits)")
             return False
         elif miss:          # no miss
+            #print("not forming three(has miss)")
             return False
         else:
-            if e[0] == 0:   # type1(all connect)
+            if e[0] == 0:   # type1(all connected)
                 if e[1] == color:   # 1 blank 1 hit
+                    #print("not forming three(type1: 1b 1h)")
                     return False
                 elif (e[1] == 0 and e[2] == color) or e[1] == -color:   # 2 blanks 1 hit or 1 blank 1 miss
+                    #print("forming three(type1: 2b 1h or 1 1b 1m)")
                     if s[0] != color and s[1] == 0:
                         return True
                     else:
                         return False
                 elif e[1] == 0 and e[2] != color:   # 2 blanks 1 miss or 3 blanks
+                    #print("not forming three(type1: 2b 1m or 3b)")
                     if s[1] == color:
                         return False
                     else:
                         return True             
-            else:           # type2(1 blank)
+            else:           # type2(1 blank inside)       
                 if e[1] != 0:   # no blank
+                    #print("not forming three(type2: 0b)") 
                     return False
                 else:
                     if e[2] == color:   # 1 blank 1 hit 
+                        #print("not forming three(type2: 1b 1h)") 
                         return False
                     elif e[2] == 0 or e[2] == -color:   # 2 blanks or 1 blank 1 miss 
+                        #print("not forming three(type2: 2b or 1b 1m)") 
                         if s[1] == color:
                             return False     
                         else:
@@ -168,6 +180,8 @@ class Environment():
         elif flag == 3:
             step_k = 1
 
+        #print("moved point:", self.move(action, step_j, step_k, lim, color))
+        
         if self.checkThree(self.move(action, step_j, step_k, lim, color), -step_j, -step_k, lim + 1, color):
             return True
         elif self.checkThree(self.move(action, -step_j, -step_k, lim, color), step_j, step_k, lim + 1, color):
@@ -181,18 +195,15 @@ class Environment():
 
         for i in range(side):
             if self.three(action, color, i):
-                print("side:", i)
                 count += 1
-
-        print(count)
-
+        print("threes:", count)
         if count >= 2:
             return True
         else:
             return False            
 
 
-    def checkFour(self, point, step_j, step_k, lim, color):
+    def checkFour(self, point, step_j, step_k, lim, color, found):
         n = len(self.state)
         hit = 0
         miss = 0
@@ -224,21 +235,31 @@ class Environment():
         self.addList(s, num, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k, color)
         self.addList(e, num, n * j + k, step_j, step_k, color)
        
-        if hit != lim:        
+        if hit != lim - 1:    
+            #print("not forming four(no 3 hits)")    
             return False
         elif miss:
+            if found:
+                return False
+
             if s[1] == 0 and s[0] != color and e[0] == -color:
+                #print("forming four(type1: 1m)")
                 return True
             else:
                 return False
         else:
             if e[0] == 0:
+                if found:
+                    return False
+
                 if (s[0] != color and s[1] == 0) or e[1] != color:
+                    #print("forming four(type1: 1b no hit)")
                     return True
                 else:
                     return False    
             else:
                 if e[1] != color:
+                    #print("forming four(type2: no hit)")
                     return True
                 else:
                     return False    
@@ -249,6 +270,7 @@ class Environment():
         step_j = -1
         step_k = -1
         count = 0
+        found = False
 
         if flag == 0:
             step_j = 0
@@ -257,10 +279,11 @@ class Environment():
         elif flag == 3:
             step_k = 1
 
-        if self.checkFour(self.move(action, step_j, step_k, lim, color), -step_j, -step_k, lim + 1, color):
+        if self.checkFour(self.move(action, step_j, step_k, lim, color), -step_j, -step_k, lim + 1, color, found):
             count += 1
+            found = True
     
-        if self.checkFour(self.move(action, -step_j, -step_k, lim, color), step_j, step_k, lim, color):
+        if self.checkFour(self.move(action, -step_j, -step_k, lim, color), step_j, step_k, lim + 1, color, found):
             count += 1
 
         return count         
@@ -271,7 +294,7 @@ class Environment():
 
         for i in range(side):
             count += self.four(action, color, i)
-
+        print("fours:", count)
         if count >= 2:
             return True
         else:
