@@ -2,7 +2,8 @@ import numpy as np
 
 class Environment():
     def __init__(self, size, goal = 5):
-        self.state = np.zeros((size, size))
+        self.state = np.zeros((size, size), dtype = int)
+        self.size = size
         self.goal = goal
 
     def place(self, action, color):
@@ -32,13 +33,14 @@ class Environment():
                 count += 1
             else:
                 break    
-        
+    
         return count
 
     def connect(self, action, num, color):
         n = len(self.state)
-        
-        for i in range(4):
+        side = 4
+
+        for i in range(side):
             step_j = -1
             step_k = -1
 
@@ -54,7 +56,7 @@ class Environment():
 
         return False
    
-    def move(self, action, color, step_j, step_k, lim):
+    def move(self, action, step_j, step_k, lim, color):
         n = len(self.state)
         j = action // n
         k = action % n
@@ -76,13 +78,13 @@ class Environment():
 
         return n * j + k    
 
-    def addList(self, lst, num, color, point, step_j, step_k):
+    def addList(self, lst, num, point, step_j, step_k, color):
         n = len(self.state)
         j = point // n
         k = point % n
 
         for i in range(num):
-            if outOfRange(j, k):
+            if self.outOfRange(j, k):
                lst.append(-color)
             else:    
                 lst.append(self.state[j][k])
@@ -90,7 +92,7 @@ class Environment():
             j += step_j
             k += step_k    
 
-    def checkThree(self, color, point, step_j, step_k, lim):
+    def checkThree(self, point, step_j, step_k, lim, color):
         n = len(self.state)
         hit = 0
         miss = 0
@@ -121,8 +123,8 @@ class Environment():
             else:
                 blank += 1        
 
-        self.addList(s, num - 1, color, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k)
-        self.addList(e, num + 1, color, n * j + k, step_j, step_k)
+        self.addList(s, num - 1, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k, color)
+        self.addList(e, num + 1, n * j + k, step_j, step_k, color)
 
         if hit != lim:      # 2 hits
             return False
@@ -166,9 +168,9 @@ class Environment():
         elif flag == 3:
             step_k = 1
 
-        if self.checkThree(color, self.move(action, color, step_j, step_k, lim), -step_j, -step_k, lim + 1):
+        if self.checkThree(self.move(action, step_j, step_k, lim, color), -step_j, -step_k, lim + 1, color):
             return True
-        elif self.checkThree(color, self.move(action, color, -step_j, -step_k), step_j, step_k, lim + 1):
+        elif self.checkThree(self.move(action, -step_j, -step_k, lim, color), step_j, step_k, lim + 1, color):
             return True
         else:
             return False        
@@ -179,7 +181,10 @@ class Environment():
 
         for i in range(side):
             if self.three(action, color, i):
+                print("side:", i)
                 count += 1
+
+        print(count)
 
         if count >= 2:
             return True
@@ -187,7 +192,7 @@ class Environment():
             return False            
 
 
-    def checkFour(self, color, point, step_j, step_k, lim):
+    def checkFour(self, point, step_j, step_k, lim, color):
         n = len(self.state)
         hit = 0
         miss = 0
@@ -216,8 +221,8 @@ class Environment():
             else:
                 blank += 1
 
-        self.addList(s, num, color, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k)
-        self.addList(e, num, color, n * j + k, step_j, step_k)
+        self.addList(s, num, n * (point_j - num * step_j) + point_k - num * step_k, step_j, step_k, color)
+        self.addList(e, num, n * j + k, step_j, step_k, color)
        
         if hit != lim:        
             return False
@@ -252,10 +257,10 @@ class Environment():
         elif flag == 3:
             step_k = 1
 
-        if self.checkFour(color, move(action, color, step_j, step_k, lim), -step_j, -step_k, lim + 1):
+        if self.checkFour(self.move(action, step_j, step_k, lim, color), -step_j, -step_k, lim + 1, color):
             count += 1
     
-        if self.checkFour(color, move(action , color, -step_j, -step_k, lim), step_j, step_k, lim):
+        if self.checkFour(self.move(action, -step_j, -step_k, lim, color), step_j, step_k, lim, color):
             count += 1
 
         return count         
@@ -274,10 +279,10 @@ class Environment():
 
     def win(self, action, color):
         if color == -1:
-            if not self.connect(self.goal + 1, action, color) and self.connect(self.goal, action, color):
+            if not self.connect(action, self.goal + 1, color) and self.connect(action, self.goal, color):
                 return True
         else:
-            if self.connect(self.goal, action, color):
+            if self.connect(action, self.goal, color):
                 return True
         
         return False
@@ -291,7 +296,7 @@ class Environment():
         self.place(action, color)
 
         if color == -1:
-            if self.connect(self.goal + 1, action):
+            if self.connect(action, self.goal + 1, color):
                 return True    
             elif self.threes(action, color):
                 return True
@@ -323,11 +328,19 @@ class Environment():
         n = len(self.state)
 
         for i in range(n):
+            print(-i + self.size, end = " " if -i + self.size >= 10 else "  ")
+
             for j in range(n):
-                print(self.state[i][j], end = " ")
+                print(self.state[i][j], end = "  " if self.state[i][j] >= 0 else " ")
 
             print()     
 
+        print("   ", end = "")
+
+        for i in range(self.size):
+            print(chr(i + 65), end = "  ")
+
+        print()    
 
 
 
