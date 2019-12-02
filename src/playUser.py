@@ -61,7 +61,7 @@ def step(envir, model, flag):
 
     return True
         
-dn = "modelA_weights.txt"
+dn = "./modelA_weights.txt"
 eta = 0.01
 gamma = 0.9
 inp = 225

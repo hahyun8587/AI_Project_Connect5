@@ -3,7 +3,7 @@ import Environment as env
 import utils
 import numpy as np
 
-def step(envir, modelA, modelB): 
+def step(envir, modelA, modelB, flag): 
     merit = 1
     demerit = -1
 
@@ -18,6 +18,12 @@ def step(envir, modelA, modelB):
     if reward == merit:
         modelB.rewards[-1] = demerit
 
+        if not flag:
+            print("modelA won by five")
+        else:
+            print("modelB won by five")    
+
+
         return False
     elif reward == demerit:
         modelB.rewards[-1] = merit
@@ -26,12 +32,12 @@ def step(envir, modelA, modelB):
 
     return True    
 
-dnA = "modelA_weights.txt"
-dnB = "modelB_weights.txt"
+dnA = "./modelA_weights.txt"
+dnB = "./modelB_weights.txt"
 modelA = None
 modleB = None
 load = True
-epoch = 200
+epoch = 10000
 eta = 0.01
 gamma = 0.9
 seed = 7
@@ -47,29 +53,6 @@ modelA = agent.Agent(arch, eta, gamma, utils.load(dnA, arch) if load else None)
 modelB = agent.Agent(arch, eta, gamma, utils.load(dnB, arch) if load else None)
 envir = env.Environment(size, goal)
 
-"""
-modelA.color = -1
-modelB.color = 1
-
-for i in range(epoch):
-    print(i)
-
-    while 1:
-        print("A")
-        if not step(envir, modelA, modelB):
-            break
-        print("B")
-        if not step(envir, modelB, modelA):
-            break
-
-    envir.show()    
-    modelA.optimizeEp()
-    modelB.optimizeEp()
-    modelA.clear()
-    modelB.clear()
-    envir.clear()
-"""
-
 for i in range(epoch):
     black = -1
     white = 1
@@ -82,10 +65,10 @@ for i in range(epoch):
         modelB.color = black   
     
     while 1: 
-        if not step(envir, modelA, modelB):
+        if not step(envir, modelA, modelB, 0):
             break
         
-        if not step(envir, modelB, modelA):
+        if not step(envir, modelB, modelA, 1):
             break
 
     envir.show()
