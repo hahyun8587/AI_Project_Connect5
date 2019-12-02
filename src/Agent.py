@@ -18,7 +18,7 @@ class Agent():
             np.random.seed(self.seed)
 
             for i in range(1, len(self.arch)):
-                self.W.append(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1)
+                self.W.append(np.array(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1, dtype = np.float64))
         else:
             self.W = W
 
@@ -68,6 +68,8 @@ class Agent():
         self.A.append(A)
         self.Z.append(Z)
 
+        print(self.softmax(A[-1]))
+
         return self.softmax(A[-1]) 
 
     def act(self, policy):
@@ -94,12 +96,13 @@ class Agent():
     def optimize(self, t):
         g_t = self.g_t(t)
 
-        self.W[-1] += self.eta * np.dot(self.softmaxPrime(self.A[t][-1]) * self.LeakyReluPrime(self.Z[t][-1]), self.A[t][-2].T) * g_t
+        self.W[-1] += self.eta * np.dot((self.arch[-1] * g_t * self.softmaxPrime(self.A[t][-1]) - g_t) * self.LeakyReluPrime(self.Z[t][-1]), self.A[t][-2].T)
 
         for i in range(len(self.W) - 2, -1, -1):
-            policy = np.dot(self.W[i + 1].T, self.softmax(self.A[t][i + 2]))
-            self.W[i] += self.eta * np.dot(self.softmaxPrime(self.A[t][i + 1]) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T) * g_t
-            print("delta\n", self.eta * np.dot(self.softmaxPrime(self.A[t][i + 1]) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T) * g_t)
+            #policy = np.dot(self.W[i + 1].T, self.softmax(self.A[t][i + 2]))
+            delta = self.eta * np.dot((self.arch[-1] * g_t * self.softmaxPrime(self.A[t][i + 1]) - g_t) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T)
+            self.W[i] += delta
+            #print("delta\n", delta)
 
     def optimizeEp(self):
         n = len(self.samples)

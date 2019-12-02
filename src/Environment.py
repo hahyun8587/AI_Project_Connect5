@@ -196,7 +196,7 @@ class Environment():
         for i in range(side):
             if self.three(action, color, i):
                 count += 1
-        print("threes:", count)
+        #print("threes:", count)
         if count >= 2:
             return True
         else:
@@ -294,7 +294,7 @@ class Environment():
 
         for i in range(side):
             count += self.four(action, color, i)
-        print("fours:", count)
+        #print("fours:", count)
         if count >= 2:
             return True
         else:
@@ -329,8 +329,8 @@ class Environment():
         return False
 
     def reward(self, action, color):
-        merit = 10
-        demerit = -10
+        merit = 1
+        demerit = -1
         neut = 0
 
         if self.lose(action, color):

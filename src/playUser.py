@@ -7,8 +7,8 @@ def translate(string, size):
     return size * (int(string[0:len(string) - 1]) - 1) + ord(string[len(string) - 1]) - ord("A")
 
 def step(envir, model, flag):
-    merit = 10
-    demerit = -10
+    merit = 1
+    demerit = -1
 
     if not flag:
         reward = envir.reward(translate(input("your turn: "), envir.size), -model.color)
@@ -65,7 +65,7 @@ dn = "modelA_weights.txt"
 eta = 0.01
 gamma = 0.9
 inp = 225
-hidden = 300
+hidden = 30
 outp = 225
 num = 10
 size = 15

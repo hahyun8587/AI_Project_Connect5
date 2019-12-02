@@ -4,8 +4,8 @@ import utils
 import numpy as np
 
 def step(envir, modelA, modelB): 
-    merit = 10
-    demerit = -10
+    merit = 1
+    demerit = -1
 
     state = envir.state
     policy = modelA.predict(state.reshape(-1, 1))
@@ -32,13 +32,13 @@ dnA = "modelA_weights.txt"
 dnB = "modelB_weights.txt"
 modelA = None
 modleB = None
-load = True
-epoch = 10000
+load = False
+epoch = 100
 eta = 0.01
 gamma = 0.9
 seed = 7
 inp = 225
-hidden = 300
+hidden = 30
 outp = 225
 num = 10
 size = 15
