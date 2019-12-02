@@ -2,9 +2,6 @@ import Agent as agent
 import Environment as env
 import utils
 import numpy as np
-import warnings
-
-warnings.filterwarnings("ignore", category = RuntimeWarning)
 
 def step(envir, modelA, modelB): 
     merit = 10
@@ -12,12 +9,13 @@ def step(envir, modelA, modelB):
 
     state = envir.state
     policy = modelA.predict(state.reshape(-1, 1))
-    action = modelA.act(policy) # for debug
-    reward = envir.reward(action, modelA.color)
-    
-    print(modelA.A[-1][-1] - modelA.A[-1][-1].max(axis = 0), policy, action, reward) #for debug
+    #print(modelA.A[-1][-1], modelA.A[-1][-1] - modelA.A[-1][-1].max(axis = 0), modelA.softmax(modelA.A[-1][-1]), modelA.W[-1], sep = "\n") #for debug
+    #action = modelA.act(policy) 
+    reward = envir.reward(modelA.act(policy), modelA.color)
     
     modelA.saveSample(state, policy, reward)
+
+    print(reward)
 
     if reward == merit:
         modelB.samples[-1][2] = demerit
@@ -34,14 +32,14 @@ dnA = "modelA_weights.txt"
 dnB = "modelB_weights.txt"
 modelA = None
 modleB = None
-load = False
-epoch = 10
+load = True
+epoch = 10000
 eta = 0.01
 gamma = 0.9
 seed = 7
 inp = 225
 hidden = 300
-outp = 10
+outp = 225
 num = 10
 size = 15
 goal = 5
@@ -59,8 +57,10 @@ for i in range(epoch):
     print(i)
 
     while 1:
+        print("A")
         if not step(envir, modelA, modelB):
             break
+        print("B")
         if not step(envir, modelB, modelA):
             break
 
@@ -87,9 +87,14 @@ for i in range(epoch):
         if not step(envir, modelA, modelB):
             break
         
+        envir.show()  
+
         if not step(envir, modelB, modelA):
             break
-        
+
+        envir.show()  
+    
+    envir.show()
     modelA.optimizeEp()
     modelB.optimizeEp()
     modelA.clear()

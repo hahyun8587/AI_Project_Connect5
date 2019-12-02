@@ -363,7 +363,7 @@ class Environment():
         for i in range(self.size):
             print(chr(i + 65), end = "  ")
 
-        print()    
+        print("\n")    
 
 
 

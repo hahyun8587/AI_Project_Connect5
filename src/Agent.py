@@ -22,6 +22,17 @@ class Agent():
         else:
             self.W = W
 
+    """
+    def norm(self, A):
+        A_min = A.min(axis = 0)
+        A_max = A.max(axis = 0)
+
+        return A - A_min / (A_max - A_min) 
+
+    def stand(self, R):
+        return (R - R.mean(axis = 0)) / R.std(axis = 0) 
+    """
+
     def LeakyRelu(self, Z):
         arr = Z.copy()
 
@@ -35,23 +46,14 @@ class Agent():
     def LeakyReluPrime(self, Z):
         return np.where(Z > 0, 1, 0.01)   
 
-    def norm(self, A):
-        A_min = A.min(axis = 0)
-        A_max = A.max(axis = 0)
-
-        return A - A_min / (A_max - A_min) 
-
-    def SM(self, A):
-        c = 0.00001
-
+    def softmax(self, A):
         norm = A - A.max(axis = 0)
         exps = np.exp(norm)
-        sums = exps.sum(axis = 0)
-
-        return exps / sums if sums else c
+        
+        return exps / exps.sum(axis = 0)
     
-    def SMPrime(self, A):
-        sm = self.SM(A)
+    def softmaxPrime(self, A):
+        sm = self.softmax(A)
 
         return sm * (1 - sm)
 
@@ -66,7 +68,7 @@ class Agent():
         self.A.append(A)
         self.Z.append(Z)
 
-        return self.SM(A[-1]) 
+        return self.softmax(A[-1]) 
 
     def act(self, policy):
         return np.random.choice(self.arch[-1], p = policy.flat) 
@@ -92,12 +94,12 @@ class Agent():
     def optimize(self, t):
         g_t = self.g_t(t)
 
-        self.W[-1] += self.eta * np.dot(self.SMPrime(self.A[t][-1]) * self.LeakyReluPrime(self.Z[t][-1]), self.A[t][-2].T) * g_t
+        self.W[-1] += self.eta * np.dot(self.softmaxPrime(self.A[t][-1]) * self.LeakyReluPrime(self.Z[t][-1]), self.A[t][-2].T) * g_t
 
         for i in range(len(self.W) - 2, -1, -1):
-            policy = np.dot(self.W[i + 1].T, self.SM(self.A[t][i + 2]))
-            self.W[i] += self.eta * np.dot(policy * (1 - policy) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T) * g_t
-
+            policy = np.dot(self.W[i + 1].T, self.softmax(self.A[t][i + 2]))
+            self.W[i] += self.eta * np.dot(self.softmaxPrime(self.A[t][i + 1]) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T) * g_t
+            print("delta\n", self.eta * np.dot(self.softmaxPrime(self.A[t][i + 1]) * self.LeakyReluPrime(self.Z[t][i]), self.A[t][i].T) * g_t)
 
     def optimizeEp(self):
         n = len(self.samples)

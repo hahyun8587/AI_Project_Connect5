@@ -54,7 +54,7 @@ def load(dn, arch):
         print("no file found in the directory")            
 
     for i in range(1, len(arch)):
-        W.append(np.zeros(arch[i], arch[i - 1]))
+        W.append(np.zeros((arch[i], arch[i - 1])))
 
     for i in range(len(W)):
         for j in range(len(W[i])):
