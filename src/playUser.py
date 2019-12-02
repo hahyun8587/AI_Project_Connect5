@@ -67,7 +67,7 @@ gamma = 0.9
 inp = 225
 hidden = 30
 outp = 225
-num = 10
+num = 5
 size = 15
 goal = 5
 

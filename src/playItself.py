@@ -9,20 +9,18 @@ def step(envir, modelA, modelB):
 
     state = envir.state
     policy = modelA.predict(state.reshape(-1, 1))
+    action = modelA.act(policy) 
     #print(modelA.A[-1][-1], modelA.A[-1][-1] - modelA.A[-1][-1].max(axis = 0), modelA.softmax(modelA.A[-1][-1]), modelA.W[-1], sep = "\n") #for debug
-    #action = modelA.act(policy) 
-    reward = envir.reward(modelA.act(policy), modelA.color)
+    reward = envir.reward(action, modelA.color)
     
-    modelA.saveSample(state, policy, reward)
-
-    print(reward)
+    modelA.saveSample(state, action, reward)
 
     if reward == merit:
-        modelB.samples[-1][2] = demerit
+        modelB.rewards[-1] = demerit
 
         return False
     elif reward == demerit:
-        modelB.samples[-1][2] = merit
+        modelB.rewards[-1] = merit
 
         return False
 
@@ -32,15 +30,15 @@ dnA = "modelA_weights.txt"
 dnB = "modelB_weights.txt"
 modelA = None
 modleB = None
-load = False
-epoch = 100
+load = True
+epoch = 200
 eta = 0.01
 gamma = 0.9
 seed = 7
 inp = 225
 hidden = 30
 outp = 225
-num = 10
+num = 5
 size = 15
 goal = 5
 
@@ -87,13 +85,9 @@ for i in range(epoch):
         if not step(envir, modelA, modelB):
             break
         
-        envir.show()  
-
         if not step(envir, modelB, modelA):
             break
 
-        envir.show()  
-    
     envir.show()
     modelA.optimizeEp()
     modelB.optimizeEp()
