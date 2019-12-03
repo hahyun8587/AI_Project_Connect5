@@ -4,11 +4,11 @@ import utils
 import numpy as np
 
 def translate(string, size):
-    return size * (int(string[0:len(string) - 1]) - 1) + ord(string[len(string) - 1]) - ord("A")
+    return size * (15 - int(string[1:len(string)])) + ord(string[0]) - ord("A")
 
 def step(envir, model, flag):
     merit = 1
-    demerit = -1
+    demerit = -10
 
     if not flag:
         reward = envir.reward(translate(input("your turn: "), envir.size), -model.color)
@@ -23,7 +23,9 @@ def step(envir, model, flag):
 
             return False
 
-        reward = envir.reward(model.act(model.predict(envir.state.reshape(-1, 1))), model.color)
+        print(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        action = model.act(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        reward = envir.reward(action, model.color)
         envir.show()
 
         if reward == merit:
@@ -35,7 +37,9 @@ def step(envir, model, flag):
 
             return False 
     else:
-        reward = envir.reward(model.act(model.predict(envir.state.reshape(-1, 1))), model.color)
+        print(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        action = model.act(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        reward = envir.reward(action, model.color)
         envir.show()
 
         if reward == merit:
@@ -64,7 +68,7 @@ def step(envir, model, flag):
 dn = "./modelA_weights.txt"
 eta = 0.01
 gamma = 0.9
-inp = 225
+inp = 226
 hidden = 30
 outp = 225
 num = 5
@@ -88,6 +92,7 @@ else:
     color = white
     model.color = -1 
 
+print()
 envir.show()    
     
 while 1:

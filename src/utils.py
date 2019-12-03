@@ -107,7 +107,5 @@ def netArch(inp, hidden, outp, num):
 
     return arch    
 
-    
-
 
         

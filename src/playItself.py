@@ -5,27 +5,32 @@ import numpy as np
 
 def step(envir, modelA, modelB, flag): 
     merit = 1
-    demerit = -1
+    demerit = -10
 
     state = envir.state
-    policy = modelA.predict(state.reshape(-1, 1))
+    policy = modelA.predict(np.vstack(([1], state.reshape(-1, 1))))
     action = modelA.act(policy) 
+    print(policy)
     #print(modelA.A[-1][-1], modelA.A[-1][-1] - modelA.A[-1][-1].max(axis = 0), modelA.softmax(modelA.A[-1][-1]), modelA.W[-1], sep = "\n") #for debug
     reward = envir.reward(action, modelA.color)
     
     modelA.saveSample(state, action, reward)
 
     if reward == merit:
-        modelB.rewards[-1] = demerit
-
         if not flag:
             print("modelA won by five")
         else:
             print("modelB won by five")    
 
+        modelB.rewards[-1] = demerit
 
         return False
     elif reward == demerit:
+        if not flag:
+            print("modelA lost by miss")
+        else:
+            print("modelB lost by miss")    
+
         modelB.rewards[-1] = merit
 
         return False
@@ -36,12 +41,12 @@ dnA = "./modelA_weights.txt"
 dnB = "./modelB_weights.txt"
 modelA = None
 modleB = None
-load = True
-epoch = 10000
-eta = 0.01
+load = False
+epoch = 1
+eta = 0.1
 gamma = 0.9
 seed = 7
-inp = 225
+inp = 226
 hidden = 30
 outp = 225
 num = 5
@@ -72,10 +77,8 @@ for i in range(epoch):
             break
 
     envir.show()
-    modelA.optimizeEp()
-    modelB.optimizeEp()
-    modelA.clear()
-    modelB.clear()
+    modelA.optimize()
+    modelB.optimize()
     envir.clear()    
         
 utils.save(dnA, modelA.W)

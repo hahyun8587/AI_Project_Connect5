@@ -20,9 +20,7 @@ class Agent():
             np.random.seed(self.seed)
 
             for i in range(1, len(self.arch)):
-                self.W.append(np.array(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1, dtype = np.float64))
-
-            print(self.W)    
+                self.W.append(np.array(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1, dtype = np.float64))   
         else:
             self.W = W
     """
@@ -32,11 +30,11 @@ class Agent():
 
         return A - A_min / (A_max - A_min) 
     """
-    """
+    
     def stand(self, R):
         return (R - R.mean(axis = 0)) / R.std(axis = 0) 
+    
     """
-
     def LeakyRelu(self, Z):
         arr = Z.copy()
 
@@ -49,6 +47,7 @@ class Agent():
 
     def LeakyReluPrime(self, Z):
         return np.where(Z > 0, 1, 0.01)  
+    """
 
     def relu(self, Z):
         return Z * (Z > 0)
@@ -57,7 +56,6 @@ class Agent():
         return np.where(Z > 0, 1, 0)   
 
     def softmax(self, A):
-        #print("A", A, sep = "\n")
         norm = A - A.max(axis = 0)
         exps = np.exp(norm)
         
@@ -74,18 +72,19 @@ class Agent():
         return norm - np.log(np.exp(norm).sum(axis = 0))   
     """
 
+    def objectiveFunc(self, Y, prob):    
+        return (np.log((Y * prob).sum(axis = 0)) * self.g).sum(axis = 0)
+
     def predict(self, X):
         Z = []
         A = [X]
 
         for i in range(len(self.W)):
-            Z.append(np.dot(self.W[i], A[i]))    
+            Z.append(np.dot(self.W[i], A[i]))  
             A.append(self.relu(Z[i]))
         
         self.A.append(A)
         self.Z.append(Z)
-
-        #print(self.softmax(A[-1]))
 
         return self.softmax(A[-1]) 
 
@@ -101,11 +100,6 @@ class Agent():
         self.actions.append(oneHot)
         self.rewards.append(reward)
 
-    """
-    def prob(self):
-        return np.array(self.actions) * self.np.array(self.A).T
-    """
-    
     def calcG_t(self):
         n = len(self.states)
 
@@ -115,37 +109,53 @@ class Agent():
         for i in range(n - 2, -1, -1):
             dp[i] = self.rewards[i] + self.gamma * dp[i + 1]
 
-        self.cost.append(dp[0])
+        #self.g = self.stand(dp)
         self.g = dp
     
     def g_t(self, t):
-        return self.g[t]
+        return self.g[t]   
 
-    def optimize(self, t):
-        g_t = self.g_t(t)
-        #reward = self.g.sum(axis = 0)
+    def optimize(self):
+        Z = [np.hstack([self.Z[j][i] for j in range(len(self.Z))]) for i in range(len(self.Z[0]))]
+        A = [np.hstack([self.A[j][i] for j in range(len(self.A))]) for i in range(len(self.A[0]))]
+        Y = np.array(self.actions).T
 
-        for i in range(len(self.W) - 1):
-            #policy = np.dot(self.W[i + 1].T, self.softmax(self.A[t][i + 2]))
-            delta = self.eta * (np.dot((self.arch[-1] * self.softmax(self.A[t][i + 1]) - 1) * self.reluPrime(self.Z[t][i]), self.A[t][i].T)) * g_t
+        self.calcG_t()
+        self.cost.append(self.objectiveFunc(Y, self.softmax(A[-1])))
+        print("cost: ", self.cost) 
+        print("discounted reward:", self.g)
+        print("log prob:", np.log((Y * self.softmax(A[-1])).sum(axis = 0)))   
+        #print("\n", Z, A, sep = "\n")
+
+        E = Y - self.softmax(A[-1])
+        
+        self.W[-1] += np.dot(self.g * E * self.reluPrime(Z[-1]), A[-2].T)
+
+        for i in range(len(self.W) - 2, -1, -1):
+            E = np.dot(self.W[i + 1].T, E)
+            delta = np.dot(self.g * E * self.reluPrime(Z[i]), A[i].T)
             self.W[i] += delta
             #print("delta\n", delta)
-        self.W[-1] += self.eta * np.dot((self.arch[-1] * self.softmax(self.A[t][-1]) - 1) * self.reluPrime(self.Z[t][-1]), self.A[t][-2].T) * g_t
 
+        self.clear()    
+
+    """
     def optimizeEp(self):
         n = len(self.states)
 
         self.calcG_t()
+        self.stand(self.g)
 
         for i in range(n):
             self.optimize(i)
 
         self.clear()    
+    """    
     
     def clear(self):
-        for i in range(len(self.states)):
-            self.states.pop(0)
-            self.actions.pop(0)
-            self.rewards.pop(0)
-            self.Z.pop(0)
-            self.A.pop(0)
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        self.Z = []
+        self.A = []
+    
