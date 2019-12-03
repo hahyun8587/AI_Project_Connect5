@@ -6,6 +6,7 @@
     * 보상함수를 증가시키는 방향으로 가중치 업데이트 -> 경사상승
 
 ### Object Function
+    $\nalba\theta$
     J(w_jk) = \sum_s d_pi(s) \sum_a pi_w_jk(a\right\vert s)q_pi(s,a)
 
     $d_pi(s)$: 상태 s에 존재할 확률
