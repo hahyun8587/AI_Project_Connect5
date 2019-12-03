@@ -69,9 +69,9 @@ dn = "./modelA_weights.txt"
 eta = 0.01
 gamma = 0.9
 inp = 226
-hidden = 30
-outp = 225
-num = 5
+hidden = 3
+outp = 10
+num = 1
 size = 15
 goal = 5
 

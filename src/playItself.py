@@ -10,8 +10,6 @@ def step(envir, modelA, modelB, flag):
     state = envir.state
     policy = modelA.predict(np.vstack(([1], state.reshape(-1, 1))))
     action = modelA.act(policy) 
-    print(policy)
-    #print(modelA.A[-1][-1], modelA.A[-1][-1] - modelA.A[-1][-1].max(axis = 0), modelA.softmax(modelA.A[-1][-1]), modelA.W[-1], sep = "\n") #for debug
     reward = envir.reward(action, modelA.color)
     
     modelA.saveSample(state, action, reward)
@@ -42,14 +40,14 @@ dnB = "./modelB_weights.txt"
 modelA = None
 modleB = None
 load = False
-epoch = 1
-eta = 0.1
+epoch = 10
+eta = 0.01
 gamma = 0.9
 seed = 7
 inp = 226
 hidden = 30
 outp = 225
-num = 5
+num = 10
 size = 15
 goal = 5
 

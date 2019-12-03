@@ -20,7 +20,9 @@ class Agent():
             np.random.seed(self.seed)
 
             for i in range(1, len(self.arch)):
-                self.W.append(np.array(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1, dtype = np.float64))   
+                #self.W.append(np.random.normal(scale = np.sqrt(2 / (self.arch[i - 1] + self.arch[i])), size = (self.arch[i], self.arch[i - 1])))   
+                self.W.append(2 * np.random.random((self.arch[i], self.arch[i - 1])) - 1) 
+            #print(self.W)
         else:
             self.W = W
     """
@@ -28,12 +30,11 @@ class Agent():
         A_min = A.min(axis = 0)
         A_max = A.max(axis = 0)
 
-        return A - A_min / (A_max - A_min) 
+        return A - A_min / (A_max - A_min) if A_max - A_min else A
     """
-    
+
     def stand(self, R):
-        return (R - R.mean(axis = 0)) / R.std(axis = 0) 
-    
+        return (R - R.mean(axis = 0)) / R.std(axis = 0) if R.std(axis = 0) else R
     """
     def LeakyRelu(self, Z):
         arr = Z.copy()
@@ -80,8 +81,9 @@ class Agent():
         A = [X]
 
         for i in range(len(self.W)):
-            Z.append(np.dot(self.W[i], A[i]))  
-            A.append(self.relu(Z[i]))
+            Z.append(np.dot(self.W[i], A[i]))
+            #print(Z[i])  
+            A.append(self.relu(Z[i]))    
         
         self.A.append(A)
         self.Z.append(Z)
@@ -116,6 +118,7 @@ class Agent():
         return self.g[t]   
 
     def optimize(self):
+        m = len(self.rewards)
         Z = [np.hstack([self.Z[j][i] for j in range(len(self.Z))]) for i in range(len(self.Z[0]))]
         A = [np.hstack([self.A[j][i] for j in range(len(self.A))]) for i in range(len(self.A[0]))]
         Y = np.array(self.actions).T
@@ -125,32 +128,20 @@ class Agent():
         print("cost: ", self.cost) 
         print("discounted reward:", self.g)
         print("log prob:", np.log((Y * self.softmax(A[-1])).sum(axis = 0)))   
+        #print("prob:", self.softmax(A[-1]))
         #print("\n", Z, A, sep = "\n")
 
         E = Y - self.softmax(A[-1])
         
-        self.W[-1] += np.dot(self.g * E * self.reluPrime(Z[-1]), A[-2].T)
+        self.W[-1] += 1 / m * np.dot(self.g * E * self.reluPrime(Z[-1]), A[-2].T)
 
         for i in range(len(self.W) - 2, -1, -1):
             E = np.dot(self.W[i + 1].T, E)
-            delta = np.dot(self.g * E * self.reluPrime(Z[i]), A[i].T)
+            delta = 1 / m * np.dot(self.g * E * self.reluPrime(Z[i]), A[i].T)
             self.W[i] += delta
             #print("delta\n", delta)
 
         self.clear()    
-
-    """
-    def optimizeEp(self):
-        n = len(self.states)
-
-        self.calcG_t()
-        self.stand(self.g)
-
-        for i in range(n):
-            self.optimize(i)
-
-        self.clear()    
-    """    
     
     def clear(self):
         self.states = []
