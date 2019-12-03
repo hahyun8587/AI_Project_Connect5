@@ -1,3 +1,5 @@
+html header: <script type="text/javascript"  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 # AI_Project_Connect5
 
 ### Policy Gradient  
@@ -7,7 +9,7 @@
 
 ### Object Function
     $\nalba\theta$  
-    
+
     J(w_jk) = \sum_s d_pi(s) \sum_a pi_w_jk(a\right\vert s)q_pi(s,a)
 
     $d_pi(s)$: 상태 s에 존재할 확률
