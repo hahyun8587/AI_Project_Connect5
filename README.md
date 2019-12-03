@@ -8,8 +8,8 @@
 ### Object Function
     J(w_jk) = \sum_s d_pi(s) \sum_a pi_w_jk(a\right\vert s)q_pi(s,a)
 
-    d_pi(s): 상태 s에 존재할 확률
-    pi_w_jk(a\right\vert s):상태 s에서 액션 a를 할 확률
+    $d_pi(s)$: 상태 s에 존재할 확률
+    $pi_w_jk(a\right\vert s)$:상태 s에서 액션 a를 할 확률
     q_pi(s,a): 상태 s에서 액션 a를 해서 얻을 수 있는 모든 보상의 합
 
     => 
