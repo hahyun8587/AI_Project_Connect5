@@ -23,8 +23,8 @@ def step(envir, model, flag):
 
             return False
 
-        print(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
-        action = model.act(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        print(model.predict(envir.state.reshape(-1, 1)))
+        action = model.act(model.predict(envir.state.reshape(-1, 1)))
         reward = envir.reward(action, model.color)
         envir.show()
 
@@ -37,8 +37,8 @@ def step(envir, model, flag):
 
             return False 
     else:
-        print(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
-        action = model.act(model.predict(np.vstack(([1], envir.state.reshape(-1, 1)))))
+        print(model.predict(envir.state.reshape(-1, 1)))
+        action = model.act(model.predict(envir.state.reshape(-1, 1)))
         reward = envir.reward(action, model.color)
         envir.show()
 
@@ -68,10 +68,10 @@ def step(envir, model, flag):
 dn = "./modelA_weights.txt"
 eta = 0.01
 gamma = 0.9
-inp = 226
-hidden = 3
+inp = 225
+hidden = 30
 outp = 10
-num = 1
+num = 10
 size = 15
 goal = 5
 

@@ -1,5 +1,5 @@
 import numpy as np
-
+ 
 class Agent():
     def __init__(self, arch, eta, gamma, W = None, seed = None, epoch = None):
         self.states = []
@@ -12,6 +12,11 @@ class Agent():
         self.epoch = epoch
         self.eta = eta
         self.gamma = gamma
+
+        self.B = []
+
+        for i in range(1, len(self.arch)):
+            self.B.append(np.random.random((self.arch[i], 1)))
 
         if W == None:
             self.seed = seed
@@ -81,13 +86,13 @@ class Agent():
         A = [X]
 
         for i in range(len(self.W)):
-            Z.append(np.dot(self.W[i], A[i]))
+            Z.append(np.dot(self.W[i], A[i]) + self.B[i])
             #print(Z[i])  
             A.append(self.relu(Z[i]))    
         
-        self.A.append(A)
         self.Z.append(Z)
-
+        self.A.append(A)
+        
         return self.softmax(A[-1]) 
 
     def act(self, policy):
@@ -114,32 +119,40 @@ class Agent():
         #self.g = self.stand(dp)
         self.g = dp
     
-    def g_t(self, t):
-        return self.g[t]   
-
     def optimize(self):
         m = len(self.rewards)
         Z = [np.hstack([self.Z[j][i] for j in range(len(self.Z))]) for i in range(len(self.Z[0]))]
         A = [np.hstack([self.A[j][i] for j in range(len(self.A))]) for i in range(len(self.A[0]))]
         Y = np.array(self.actions).T
 
+        #print(Z)
+        #print(A)
+
         self.calcG_t()
         self.cost.append(self.objectiveFunc(Y, self.softmax(A[-1])))
-        print("cost: ", self.cost) 
-        print("discounted reward:", self.g)
-        print("log prob:", np.log((Y * self.softmax(A[-1])).sum(axis = 0)))   
+        #print("cost: ", self.cost) 
+        #print("discounted reward:", self.g)
+        #print("log prob:", np.log((Y * self.softmax(A[-1])).sum(axis = 0)))   
         #print("prob:", self.softmax(A[-1]))
         #print("\n", Z, A, sep = "\n")
 
+        #print("A:", A[-1])
+        #print("policy:", self.softmax(np.array(A[-1])))
+        #print("Y:", Y)
+
         E = Y - self.softmax(A[-1])
-        
-        self.W[-1] += 1 / m * np.dot(self.g * E * self.reluPrime(Z[-1]), A[-2].T)
+        dZ = self.g * self.reluPrime(Z[-1])
+        self.W[-1] += np.dot(dZ, A[-2].T)
+        self.B[-1] += dZ.sum(axis = 1, keepdims = True)
 
         for i in range(len(self.W) - 2, -1, -1):
             E = np.dot(self.W[i + 1].T, E)
-            delta = 1 / m * np.dot(self.g * E * self.reluPrime(Z[i]), A[i].T)
-            self.W[i] += delta
-            #print("delta\n", delta)
+            dZ = self.g * E * self.reluPrime(Z[i])
+            dW = np.dot(dZ, A[i].T)
+            self.W[i] += dW
+            self.B[i] += dZ.sum(axis = 1, keepdims = True)
+            #print("delta\n", dW)
+            #print(E)
 
         self.clear()    
     

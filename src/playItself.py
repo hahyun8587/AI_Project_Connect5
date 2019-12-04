@@ -8,7 +8,7 @@ def step(envir, modelA, modelB, flag):
     demerit = -10
 
     state = envir.state
-    policy = modelA.predict(np.vstack(([1], state.reshape(-1, 1))))
+    policy = modelA.predict(envir.state.reshape(-1, 1))
     action = modelA.act(policy) 
     reward = envir.reward(action, modelA.color)
     
@@ -44,8 +44,8 @@ epoch = 10
 eta = 0.01
 gamma = 0.9
 seed = 7
-inp = 226
-hidden = 30
+inp = 225
+hidden = 50
 outp = 225
 num = 10
 size = 15

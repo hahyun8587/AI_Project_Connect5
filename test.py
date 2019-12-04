@@ -1,6 +1,8 @@
 import numpy as np
 import src.Environment as env
 
+def translate(string, size):
+    return size * (15 - int(string[1:len(string)])) + ord(string[0]) - ord("A")
 
 size = 15
 goal = 5
@@ -12,7 +14,7 @@ envir = env.Environment(size, goal)
 
 while 1:
     envir.show()
-    reward = envir.reward(int(input()), color) 
+    reward = envir.reward(translate(input(), size), color) 
     print("reward:", reward)
 
     if reward == merit:
