@@ -4,6 +4,7 @@ import src.Environment as env
 def translate(string, size):
     return size * (15 - int(string[1:len(string)])) + ord(string[0]) - ord("A")
 
+"""
 size = 15
 goal = 5
 color = -1
@@ -25,3 +26,4 @@ while 1:
         print("lose")     
 
         break
+"""    

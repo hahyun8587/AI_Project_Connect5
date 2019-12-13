@@ -330,7 +330,7 @@ class Environment():
 
     def reward(self, action, color):
         merit = 1
-        demerit = -10
+        demerit = -1
         neut = 0
 
         if self.lose(action, color):

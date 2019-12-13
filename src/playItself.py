@@ -5,7 +5,7 @@ import numpy as np
 
 def step(envir, modelA, modelB, flag): 
     merit = 1
-    demerit = -10
+    demerit = -1
 
     state = envir.state
     policy = modelA.predict(envir.state.reshape(-1, 1))
@@ -39,14 +39,14 @@ dnA = "./modelA_weights.txt"
 dnB = "./modelB_weights.txt"
 modelA = None
 modleB = None
-load = False
-epoch = 10
-eta = 0.01
+load = True
+epoch = 100
+eta = 0.001
 gamma = 0.9
 seed = 7
 inp = 225
-hidden = 50
-outp = 225
+hidden = 30
+outp = 10
 num = 10
 size = 15
 goal = 5
